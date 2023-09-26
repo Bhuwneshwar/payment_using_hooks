@@ -37,6 +37,9 @@ app.post("/api/razorpay/pay-successful", async (req, res) => {
     if (signatureIsValid) {
       console.log("payment captured ");
       console.log(JSON.stringify(body));
+      console.log(body.payload.payment.entity.id);
+      console.log(body.payload.payment.entity.order_id);
+      //save this id on database
     } else console.log("signature is invalid ");
 
     res.send({ status: "ok" });
