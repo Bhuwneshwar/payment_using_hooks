@@ -67,6 +67,8 @@ app.post("/api/razorpay/pay-successful", function (req, res) { return __awaiter(
                 console.log("payment captured ");
                 console.log(JSON.stringify(body));
             }
+            else
+                console.log("signature is invalid ");
             res.send({ status: "ok" });
         }
         catch (error) {

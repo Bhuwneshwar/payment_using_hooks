@@ -37,7 +37,7 @@ app.post("/api/razorpay/pay-successful", async (req, res) => {
     if (signatureIsValid) {
       console.log("payment captured ");
       console.log(JSON.stringify(body));
-    }
+    } else console.log("signature is invalid ");
 
     res.send({ status: "ok" });
   } catch (error) {
