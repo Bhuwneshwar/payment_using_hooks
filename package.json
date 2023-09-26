@@ -1,0 +1,23 @@
+{
+  "name": "payment_using_hooks",
+  "version": "1.0.0",
+  "description": "learning",
+  "main": "backend/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node backend/index.js"
+  },
+  "keywords": ["payment"],
+  "author": "Bhuwneshwar",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "concurrently": "^8.2.1",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "passport": "^0.6.0",
+    "razorpay": "^2.9.2",
+    "stripe": "^13.7.0"
+  }
+}
