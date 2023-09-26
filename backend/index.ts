@@ -21,7 +21,25 @@ app.post("/api/razorpay/pay-successful", async (req, res) => {
     const body = req.body;
     console.log(body);
 
-    res.send(body);
+    //https://github.com/razorpay/razorpay-node */
+
+    const crypto = require("crypto");
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.SECRET)
+      .update(JSON.stringify(body))
+      .digest("hex");
+    const razorpay_signature = req.headers["x-razorpay-signature"];
+    console.log("sig received ", razorpay_signature);
+    console.log("sig generated ", expectedSignature);
+
+    const signatureIsValid = expectedSignature === razorpay_signature;
+    if (signatureIsValid) {
+      console.log("payment captured ");
+      console.log(JSON.stringify(body));
+    }
+
+    res.send({ status: "ok" });
   } catch (error) {
     console.error(error);
   }

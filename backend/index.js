@@ -49,12 +49,25 @@ var instance = new Razorpay({
     key_secret: process.env.RAZORPAY_API_SECRET,
 });
 app.post("/api/razorpay/pay-successful", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var body;
+    var body, crypto, expectedSignature, razorpay_signature, signatureIsValid;
     return __generator(this, function (_a) {
         try {
             body = req.body;
             console.log(body);
-            res.send(body);
+            crypto = require("crypto");
+            expectedSignature = crypto
+                .createHmac("sha256", process.env.SECRET)
+                .update(JSON.stringify(body))
+                .digest("hex");
+            razorpay_signature = req.headers["x-razorpay-signature"];
+            console.log("sig received ", razorpay_signature);
+            console.log("sig generated ", expectedSignature);
+            signatureIsValid = expectedSignature === razorpay_signature;
+            if (signatureIsValid) {
+                console.log("payment captured ");
+                console.log(JSON.stringify(body));
+            }
+            res.send({ status: "ok" });
         }
         catch (error) {
             console.error(error);

@@ -7,11 +7,22 @@ import axios from "axios";
 function App() {
   const [count, setCount] = useState(0);
   const Stripe = async () => {
-    console.log("Stripe");
+    try {
+      console.log("Stripe");
+      const { data } = await axios.post(
+        "https://payment-hooks.onrender.com/api/razorpay/pay-successful",
+        {
+          name: "Stripe",
+        }
+      ); //localhost:5006/razorpay/pay-successful
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
   const Razorpay = async () => {
     try {
-      const { data } = await axios.get("/api/razorpay");
+      const { data } = await axios.get("/api/razorpay"); //localhost:5006/razorpay/pay-successful
       console.log(data);
 
       const { success, key, name, email, contact, order } = data;
