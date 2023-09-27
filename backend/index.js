@@ -38,16 +38,38 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var bodyParser = require("body-parser");
+var ejs = require("ejs");
+var passport = require("passport");
+var expressSession = require("express-session");
+var _a = require("./database"), connectMongoose = _a.connectMongoose, User = _a.User;
+var _b = require("./PassportConfig"), InitializingPassport = _b.InitializingPassport, isAuthenticated = _b.isAuthenticated;
 var app = express();
 var Razorpay = require("razorpay");
 require("dotenv").config();
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(expressSession({
+    secret: "Ubuntu namaste 🙏 ",
+    resave: false,
+    saveUninitialized: false,
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.set("view engine", "ejs");
 var instance = new Razorpay({
     key_id: process.env.RAZORPAY_API_KEY,
     key_secret: process.env.RAZORPAY_API_SECRET,
 });
+connectMongoose();
+InitializingPassport(passport);
+app.get("/", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.render("index");
+        return [2 /*return*/];
+    });
+}); });
 app.post("/api/razorpay/pay-successful", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var body, crypto, expectedSignature, razorpay_signature, signatureIsValid;
     return __generator(this, function (_a) {
@@ -102,6 +124,55 @@ app.get("/api/razorpay", function (req, res) { return __awaiter(void 0, void 0, 
                     email: "krabi6563@gmail.com",
                     contact: "6205085598",
                 });
+                return [2 /*return*/];
+        }
+    });
+}); });
+app.get("/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.render("register");
+        return [2 /*return*/];
+    });
+}); });
+app.get("/login", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.render("login");
+        return [2 /*return*/];
+    });
+}); });
+app.get("/logout", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        req.logout();
+        res.send("Logged out");
+        return [2 /*return*/];
+    });
+}); });
+app.get("/profile", isAuthenticated, function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        res.send(req.user);
+        return [2 /*return*/];
+    });
+}); });
+app.post("/login", passport.authenticate("local", {
+    failureRedirect: "/register",
+    successRedirect: "/",
+}), function (req, res) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+    return [2 /*return*/];
+}); }); });
+app.post("/register", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var user, newUser;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, User.findOne({ username: req.body.username })];
+            case 1:
+                user = _a.sent();
+                if (user)
+                    return [2 /*return*/, res.status(400).send("User Already Exist")];
+                return [4 /*yield*/, User.create(req.body)];
+            case 2:
+                newUser = _a.sent();
+                console.log(newUser);
+                res.status(201).send(newUser);
                 return [2 /*return*/];
         }
     });

@@ -2,6 +2,11 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const ejs = require("ejs");
+const passport = require("passport");
+const expressSession = require("express-session");
+const { connectMongoose, User } = require("./database");
+const { InitializingPassport, isAuthenticated } = require("./PassportConfig");
 
 const app = express();
 const Razorpay = require("razorpay");
@@ -10,12 +15,31 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  expressSession({
+    secret: "Ubuntu namaste 🙏 ",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.set("view engine", "ejs");
 
 const instance = new Razorpay({
   key_id: process.env.RAZORPAY_API_KEY,
   key_secret: process.env.RAZORPAY_API_SECRET,
 });
 
+connectMongoose();
+
+InitializingPassport(passport);
+
+app.get("/", async (req, res) => {
+  res.render("index");
+});
 app.post("/api/razorpay/pay-successful", async (req, res) => {
   try {
     const body = req.body;
@@ -64,9 +88,37 @@ app.get("/api/razorpay", async (req, res) => {
     contact: "6205085598",
   });
 });
+app.get("/register", async (req, res) => {
+  res.render("register");
+});
+app.get("/login", async (req, res) => {
+  res.render("login");
+});
+app.get("/logout", async (req, res) => {
+  req.logout();
+  res.send("Logged out");
+});
+app.get("/profile", isAuthenticated, async (req, res) => {
+  res.send(req.user);
+});
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/register",
+    successRedirect: "/",
+  }),
+  async (req, res) => {}
+);
+app.post("/register", async (req, res) => {
+  const user = await User.findOne({ username: req.body.username });
+  if (user) return res.status(400).send("User Already Exist");
+
+  const newUser = await User.create(req.body);
+  console.log(newUser);
+  res.status(201).send(newUser);
+});
 
 app.use(express.static(path.resolve("./frontend/dist")));
-
 app.get("*", (req, res) => {
   res.sendFile(path.resolve("./frontend/dist/index.html"));
 });
